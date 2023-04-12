@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<title>Account Information</title>
+<link rel="stylesheet" href="mystyle.css">
+</head>
+
+<body>
+	<h1>
+		Welcome, <span id="username"></span>!
+	</h1>
+	<img id ="pfp" height="20px" width="20px">  
+	<p>
+		Your role is: <span id="role"></span> Your token id is :<span
+			id="tokenID"></span> Your token creation time was: <span
+			id="creationTime"></span> Your token expiration time is: <span
+			id="expirationData"></span>
+	</p>
+
+	<label for="actions">Actions:</label>
+	<select id="actions">
+		<option value="">--Please choose an option--</option>
+		<option value="logout">Logout</option>
+		<option value="change-password">Change Password</option>
+		<option value="UpdateUserAtt">Change User Attributes</option>
+		<option value="ListUsers">List users from database</option>
+		<option value="RemoveUser">Remove user from database</option>
+		<option value="SendFriendRequest">Send a friend request to a
+			user</option>
+		<option value="RemoveFriendRequest">Decline a friend request
+			from a user</option>
+		<option value="AcceptFriendRequest">Accept a friend request
+			from a user</option>
+		<option value="RemoveFriend">Remove friend from friend list</option>
+		<option value="ListUserFriends">List friends of a certain
+			user</option>
+	</select>
+	<div id="bar" class="bar" style="background-color: green;">Role </div>
+
+
+	<div id="auth-display"></div>
+
+
+	<form id="remove-user-form" style="display: none;">
+		<label for="removeUser">Username:</label> <input type=text
+			id="remove-user" name="remove user" required><br> <br>
+		<input type="submit" value="Submit">
+	</form>
+
+	<form id="friend-form" style="display: none;">
+		<label for="friendUser">Username:</label> <input type=text
+			id="friend-user" name="friend user" required><br> <br>
+		<input type="submit" value="Submit">
+	</form>
+
+	<!-- add a form for changing password -->
+	<form id="change-password-form" style="display: none;">
+		<label for="old-password">Old Password:</label> <input type="password"
+			id="old-password" name="old-password" required><br> <br>
+		<label for="new-password">New Password:</label> <input type="password"
+			id="new-password" name="new-password" required><br> <br>
+		<label for="conf-password">Confirm New Password:</label> <input
+			type="password" id="conf-password" name="conf-password" required><br>
+		<br> <input type="submit" value="Submit">
+	</form>
+	<form id="UpdateUserAtt-form" style="display: none;">
+		<label for="username">Username:</label> <input type="text"
+			id="Updateusername" name="username" required><br> <br>
+		<label for="email">Email:</label> <input type="email" id="Updateemail"
+			name="email"><br> <br> <label for="name">Name:</label>
+		<input type="text" id="Updatename" name="name"><br> <br>
+		<label for="openprofile">Open Profile:</label> <input type="checkbox"
+			id="Updateopenprofile" name="openprofile"><br> <br>
+		<label for="telnumb">Telephone Number:</label> <input type="tel"
+			id="Updatetelnumb" name="telnumb"><br> <br> <label
+			for="phonenum">Phone Number:</label> <input type="tel"
+			id="Updatephonenum" name="phonenum"><br> <br> <label
+			for="job">Job:</label> <input type="text" id="Updatejob" name="job"><br>
+		<br> <label for="placeofwork">Place of Work:</label> <input
+			type="text" id="Updateplaceofwork" name="placeofwork"><br>
+		<br> <label for="mainaddress">Main Address:</label> <input
+			type="text" id="Updatemainaddress" name="mainaddress"><br>
+		<br> <label for="secondaryaddress">Secondary Address:</label> <input
+			type="text" id="Updatesecondaryaddress" name="secondaryaddress"><br>
+		<br> <label for="NIF">NIF:</label> <input type="tel"
+			id="UpdateNIF" name="NIF"><br> <br> <label
+			for="State">Sate of Profile:</label> <input type="checkbox"
+			id="UpdateState" name="State"><br> <br> <label
+			for="Role">Role:</label> <input type="tel" id="UpdateRole"
+			name="Role"><br> 
+			<br> <label for="image">Image:</label> <input type="file"
+			id="image" name="image" accept="image/jpeg, image/png"><br><br>
+			<input type="submit"
+			value="Submit">
+	</form>
+
+	<script>
+		// retrieve authentication token from cookie
+		const authToken = JSON.parse(document.cookie.split('; ').find(row => row.startsWith('authToken=')).split('=')[1]);
+
+		// retrieve username and role from authentication token
+		var pfpUrl = "";
+    getPfp().then(value => {
+      pfpUrl = value.split('"')[1];
+      pfpUrl=pfpUrl.split('"')[0];
+      document.getElementById("pfp").setAttribute("src", pfpUrl);
+    });
+		
+		const username = authToken.username;
+		const creationTime=authToken.creationData;
+		const expirationData=authToken.expirationData;
+		const tokenID=authToken.tokenID;
+		const role = authToken.role;
+		var friendrequest=-1;
+		  if (role === 1) {
+		    document.getElementById('bar').style.backgroundColor = 'yellow';
+		  }
+		  if (role === 2) {
+			    document.getElementById('bar').style.backgroundColor = 'orange';
+			  }
+		  if (role === 3) {
+			    document.getElementById('bar').style.backgroundColor = 'red';
+			  }
+		  if (role===1||role===2) {
+			    let options = document.querySelectorAll("#actions option:nth-last-child(-n+5)");
+			    for (let option of options) {
+			        option.style.display = "none";
+			    }
+			}
+		// update page content with username and role
+		document.getElementById('username').textContent = username;
+		document.getElementById('role').textContent = role;
+		document.getElementById('tokenID').textContent = tokenID;
+		document.getElementById('creationTime').textContent = creationTime;
+		document.getElementById('expirationData').textContent = expirationData;
+		
+		async function getPfp(){
+			const response = await fetch('/rest/List/pfp', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(authToken)
+			});
+			if (response.ok) {
+				const resp= await response.text();
+				return resp;
+			}
+			else
+				return "";
+		}
+		
+		var photoURL="";
+		const gapi="https://storage.googleapis.com/";
+		const bucket = "apdc-2023-avaliacao-individual.appspot.com";
+		      function uploadFile() {
+		        
+		        var fileinput = document.getElementById('image');
+		  		var file=fileinput.files[0];
+		  		var fileNames=file.name.split(".");
+		  		var extension=fileNames[fileNames.length-1];
+		        var filename = document.getElementById('Updateusername').value+"."+extension;
+		        photoURL=gapi + bucket + "/" + filename;
+		        if (bucket == null || bucket == "" || filename == null || filename == "") {
+		          alert("Both Bucket and FileName are required");
+		          return false;
+		        } else {
+		          var request = new XMLHttpRequest();
+		          request.open("POST", "/gcs/" + bucket + "/" + filename, false);
+		          request.setRequestHeader("Content-Type", file.type);
+		          request.send(file);
+		        }
+		      }
+		      
+		// handle selection of action from dropdown menu
+		document.getElementById('actions').addEventListener('change', async (event) => {
+			console.log("document.getElementById('auth-display')");
+			document.getElementById('auth-display').innerHTML='';
+			document.getElementById('change-password-form').style.display = 'none';
+			document.getElementById('UpdateUserAtt-form').style.display = 'none';
+			document.getElementById('friend-form').style.display = 'none';
+			document.getElementById('remove-user-form').style.display = 'none';
+			const action = event.target.value;
+			if (action === 'logout') {
+				// handle logout
+				const response = await fetch('/rest/Logout/logout', {
+					method: 'DELETE',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(authToken)
+				});
+				if (response.ok) {
+					// clear authentication token from cookie
+					//document.cookie = 'authToken=;max-age=0';
+					// redirect to login page
+					 window.location.href = '/index.html';
+				} else {
+					const errorMessage = await response.text();
+					alert(errorMessage);
+					 window.location.href = '/index.html';
+				}
+			} else if (action === 'change-password') {
+				// handle change password
+				document.getElementById('change-password-form').style.display = 'block';
+				}
+			else if (action === 'RemoveUser') {
+				// handle change password
+				document.getElementById('remove-user-form').style.display = 'block';
+			}
+			else if (action === 'SendFriendRequest'){
+				document.getElementById('friend-form').style.display = 'block';
+				friendrequest = 0;
+				}
+			else if (action === 'RemoveFriendRequest'){
+				document.getElementById('friend-form').style.display = 'block';
+				friendrequest = 1;
+				}
+			else if (action === 'AcceptFriendRequest'){
+				document.getElementById('friend-form').style.display = 'block';
+				friendrequest = 2;
+				}
+			else if (action === 'RemoveFriend'){
+				document.getElementById('friend-form').style.display = 'block';
+				friendrequest = 3;
+				}
+			
+			else if (action === 'UpdateUserAtt') {
+				// handle change password
+				document.getElementById('UpdateUserAtt-form').style.display = 'block';
+			}
+			else if (action === 'ListUsers') {
+				// handle change password
+				const response = await fetch('/rest/List/v1', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(authToken)        });
+				if (response.ok) {
+					
+					var listResponse = await response.text();
+					
+					var parsedResponse = JSON.parse(listResponse);
+					console.log(parsedResponse.length);
+					console.log(parsedResponse);
+					var usersTable = document.getElementById('auth-display');
+					// create table element
+					const table = document.createElement('table');
+					
+					if(parsedResponse.length > 0){
+						//console.log(Object.keys(parsedResponse[0]));
+						var header= document.createElement('tr');
+						for(const label of Object.keys(parsedResponse[0])){
+							const cell =document.createElement('th');
+							cell.textContent=label;
+							header.appendChild(cell);
+						}
+						console.log(header);
+							table.appendChild(header);
+					}
+					// add rows to table
+					for (const user of parsedResponse) {
+					    const row = document.createElement('tr');
+					    for (const cellData of Object.values(user)) {
+					        const cell = document.createElement('td');
+					        cell.textContent = cellData;
+					        row.appendChild(cell);
+					    }
+					    table.appendChild(row);
+					}
+
+					// add table to page
+					usersTable.appendChild(table);
+				} else {
+					const errorMessage = await response.text();
+					alert(errorMessage);    
+					if (response.status === 417 ) {
+						 window.location.href = '/index.html';
+	                }
+				}
+		    }
+	
+		else if (action === 'ListUserFriends') {
+			document.getElementById('friend-form').style.display = 'block';
+			friendrequest = 4;
+	    }
+	});
+		
+		//submission for update user Att form
+		 document.getElementById('UpdateUserAtt-form').addEventListener('submit', async (event) => {
+	            event.preventDefault();
+	            // retrieve form data
+	            if(document.getElementById('image').files[0]!=null)
+	            uploadFile();
+	            const username = document.getElementById('Updateusername').value; 
+	            const email = document.getElementById('Updateemail').value;
+	            const name = document.getElementById('Updatename').value;
+	            const openprofile = document.getElementById('Updateopenprofile').checked;
+	            const telnumb = document.getElementById('Updatetelnumb').value;
+	            const phonenum = document.getElementById('Updatephonenum').value;
+	            const job = document.getElementById('Updatejob').value;
+	            const placeofwork = document.getElementById('Updateplaceofwork').value;
+	            const mainaddress = document.getElementById('Updatemainaddress').value;
+	            const secondaryaddress = document.getElementById('Updatesecondaryaddress').value;
+	            const nif = document.getElementById('UpdateNIF').value;
+	            const role = document.getElementById('UpdateRole').value;
+	            const states = document.getElementById('UpdateState').checked;
+	            const authToken = JSON.parse(document.cookie.split('; ').find(row => row.startsWith('authToken=')).split('=')[1]);
+				
+	 
+	            // send form data to server
+	            const response = await fetch('/rest/Update/UpdateUser', {
+	                method: 'POST',
+	                headers: {
+	                    'Content-Type': 'application/json'
+	                },
+	                body: JSON.stringify({
+	                    username,
+	          			email,
+	                    name: name,
+	                    openprofile: openprofile,
+	                    telNumb: telnumb,
+	                    phonenumber: phonenum,
+	                    job: job,
+	                    placeOfWork: placeofwork,
+	                    mainAddress: mainaddress,
+	                    secondaryAddress: secondaryaddress,
+	                    nif: nif,
+	                    state: states,
+	                    token: authToken,
+	                    role:role,
+	                    pfpURL : photoURL
+	                })
+	            });
+	            if (response.ok) {
+	                // handle successful password change
+	                alert('Updated the user successfully');
+	            } else {
+	                const errorMessage = await response.text();
+	                alert(errorMessage);
+	                if (response.status === 417 ) {
+	                	 window.location.href = '/index.html';
+	                }
+	            }
+		 });
+		// handle submission of change password form
+		document.getElementById('change-password-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const oldPassword = document.getElementById('old-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confPassword = document.getElementById('conf-password').value;
+            const authToken = JSON.parse(document.cookie.split('; ').find(row => row.startsWith('authToken=')).split('=')[1]);;
+
+            // send new password to server
+            const response = await fetch('/rest/Update/UpdatePassword', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Auth-Token': authToken
+                },
+                body: JSON.stringify({
+                    oldpw: oldPassword,
+                    password: newPassword,
+                    confpassword: confPassword,
+                    token: authToken
+                })
+            });
+
+            if (response.ok) {
+                // handle successful password change
+                alert('Password changed successfully');
+            } else {
+                const errorMessage = await response.text();
+                alert(errorMessage);
+                if (response.status === 417 ) {
+                	 window.location.href = '/index.html';
+                }
+            }
+        });
+		
+		document.getElementById('remove-user-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const Tusername = document.getElementById('remove-user').value;
+            const authToken = JSON.parse(document.cookie.split('; ').find(row => row.startsWith('authToken=')).split('=')[1]);;
+
+            // send new password to server
+            const response = await fetch('/rest/Delete/v1', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Auth-Token': authToken
+                },
+                body: JSON.stringify({
+                	username: Tusername,
+                    token: authToken
+                })
+            });
+            
+
+            if (response.ok) {
+                // handle successful password change
+                alert('Removed user successfully');
+                console.log(Tusername);
+                if(Tusername===authToken.username)
+                	 window.location.href = '/index.html';
+            } else {
+                const errorMessage = await response.text();
+                alert(errorMessage);
+                if (response.status === 417 ) {
+                	   window.location.href = '/index.html';
+                
+                }
+
+            }
+            
+        });
+		document.getElementById('friend-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const Tusername = document.getElementById('friend-user').value;
+            const authToken = JSON.parse(document.cookie.split('; ').find(row => row.startsWith('authToken=')).split('=')[1]);;
+			var response;
+            // send new password to server
+            if(friendrequest===0){
+            response = await fetch('/rest/Friends/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Auth-Token': authToken
+                },
+                body: JSON.stringify({
+                	username: Tusername,
+                    token: authToken
+                })
+            });
+            }
+            if(friendrequest===1){
+                 response = await fetch('/rest/Friends/decline', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Auth-Token': authToken
+                    },
+                    body: JSON.stringify({
+                    	username: Tusername,
+                        token: authToken
+                    })
+                });
+                }
+            if(friendrequest===2){
+                 response = await fetch('/rest/Friends/accept', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Auth-Token': authToken
+                    },
+                    body: JSON.stringify({
+                    	username: Tusername,
+                        token: authToken
+                    })
+                });
+                }
+            if(friendrequest===3){
+                 response = await fetch('/rest/Friends/remove', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Auth-Token': authToken
+                    },
+                    body: JSON.stringify({
+                    	username: Tusername,
+                        token: authToken
+                    })
+                });
+                }
+			if(response!=null){
+            if (response.ok&&friendrequest!=4) 
+                // handle successful password change
+                alert('Action performed  successfully');
+                
+            } else if(friendrequest===4){
+            	response = await fetch('/rest/List/FriendList', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Auth-Token': authToken
+                    },
+                    body: JSON.stringify({
+                    	username: Tusername,
+                        token: authToken
+                    })
+                });
+			if (response.ok) {
+					var listResponse = await response.text();
+					
+					var parsedResponse = JSON.parse(listResponse);
+					console.log(parsedResponse.length);
+					console.log(parsedResponse);
+					var friendsTable = document.getElementById('auth-display');
+					// create table element
+					const table = document.createElement('table');
+					
+					if(parsedResponse.length > 0){
+						//console.log(Object.keys(parsedResponse[0]));
+						var header= document.createElement('tr');
+						for(const label of Object.keys(parsedResponse[0])){
+							const cell =document.createElement('th');
+							cell.textContent=label;
+							header.appendChild(cell);
+						}
+						console.log(header);
+							table.appendChild(header);
+					}
+					// add rows to table
+					for (const user of parsedResponse) {
+					    const row = document.createElement('tr');
+					    for (const cellData of Object.values(user)) {
+					        const cell = document.createElement('td');
+					        cell.textContent = cellData;
+					        row.appendChild(cell);
+					    }
+					    table.appendChild(row);
+					}
+
+					// add table to page
+					friendsTable.appendChild(table);
+				} else {
+					const errorMessage = await response.text();
+					alert(errorMessage);    
+					if (response.status === 417 ) {
+						 window.location.href = '/index.html';
+	                }
+            
+            	}
+            }
+            else {
+                const errorMessage = await response.text();
+                alert(errorMessage);
+                if (response.status === 417 ) {
+                	   window.location.href = '/index.html';
+                
+                }
+
+            }
+            
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Login Example</title>
+  </head>
+  <body>
+    <form id="login-form">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username"><br><br>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password"><br><br>
+      <input type="submit" value="Submit">
+    </form>
+
+    <script>
+     document.getElementById('login-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  const response = await fetch('http://localhost:8080/rest/login/v1', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ username, password })
+  });
+  if (response.ok) {
+    const data = await 
+   response.json();
+    document.cookie = `authToken=${data.token};max-age=${data.expirationData}`;
+    // handle successful login
+    alert(JSON.stringify(data));
+  } else {
+    const errorMessage = await response.text();
+    alert(errorMessage);
+  }
+});
+    </script>
+  </body>
+</html>

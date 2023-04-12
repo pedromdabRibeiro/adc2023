@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<head>
+<title>Create Account</title>
+</head>
+<body>
+	<h1>Create Account</h1>
+	<form id="create-account-form">
+		<label for="username">Username:</label> <input type="text"
+			id="username" name="username" required><br>
+		<br> <label for="password">Password:</label> <input
+			type="password" id="password" name="password" required><br>
+		<br> <label for="confpassword">Confirm Password:</label> <input
+			type="password" id="confpassword" name="confpassword" required><br>
+		<br> <label for="email">Email:</label> <input type="email"
+			id="email" name="email" required><br>
+		<br> <label for="name">Name:</label> <input type="text" id="name"
+			name="name"><br>
+		<br> <label for="openprofile">Open Profile:</label> <input
+			type="checkbox" id="openprofile" name="openprofile"><br>
+		<br> <label for="telnumb">Telephone Number:</label> <input
+			type="tel" id="telnumb" name="telnumb"><br>
+		<br> <label for="phonenum">Phone Number:</label> <input
+			type="tel" id="phonenum" name="phonenum"><br>
+		<br> <label for="job">Job:</label> <input type="text" id="job"
+			name="job"><br>
+		<br> <label for="placeofwork">Place of Work:</label> <input
+			type="text" id="placeofwork" name="placeofwork"><br>
+		<br> <label for="mainaddress">Main Address:</label> <input
+			type="text" id="mainaddress" name="mainaddress"><br>
+		<br> <label for="secondaryaddress">Secondary Address:</label> <input
+			type="text" id="secondaryaddress" name="secondaryaddress"><br>
+		<br> <label for="NIF">NIF:</label> <input type="tel" id="NIF"
+			name="NIF"><br>
+		<br> <label for="image">Image:</label> <input type="file"
+			id="image" name="image" accept="image/jpeg, image/png"><br>
+		<br> <input type="submit" value="Submit">
+	</form>
+			<script>
+			var photoURL="";
+			const gapi="https://storage.googleapis.com/";
+			const bucket = "apdc-2023-avaliacao-individual.appspot.com";
+			      function uploadFile() {
+			        
+			        var fileinput = document.getElementById('image');
+			  		var file=fileinput.files[0];
+			  		var fileNames=file.name.split(".");
+			  		var extension=fileNames[fileNames.length-1];
+			        var filename = document.getElementById('username').value+"."+extension;
+			        photoURL=gapi + bucket + "/" + filename;
+			        if (bucket == null || bucket == "" || filename == null || filename == "") {
+			          alert("Both Bucket and FileName are required");
+			          return false;
+			        } else {
+			          var request = new XMLHttpRequest();
+			          request.open("POST", "/gcs/" + bucket + "/" + filename, false);
+			          request.setRequestHeader("Content-Type", file.type);
+			          request.send(file);
+			        }
+			      }
+			      
+			      
+            document.getElementById('create-account-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            // retrieve form data
+            if(document.getElementById('image').files[0]!=null){
+            uploadFile();
+            console.log("uploading file");
+            }
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const confpassword = document.getElementById('confpassword').value;
+            const email = document.getElementById('email').value;
+            const name = document.getElementById('name').value;
+            const openprofile = document.getElementById('openprofile').checked;
+            const telnumb = document.getElementById('telnumb').value;
+            const phonenum = document.getElementById('phonenum').value;
+            const job = document.getElementById('job').value;
+            const placeofwork = document.getElementById('placeofwork').value;
+            const mainaddress = document.getElementById('mainaddress').value;
+            const secondaryaddress = document.getElementById('secondaryaddress').value;
+            const nif = document.getElementById('NIF').value;
+           
+            // send form data to server
+            const response = await fetch('/rest/register/v1', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username,
+                    password,
+                    confpassword,
+                    email,
+                    Name: name,
+                    Openprofile: openprofile,
+                    TelNumb: telnumb,
+                    Phonenumber: phonenum,
+                    Job: job,
+                    placeOfWork: placeofwork,
+                    MainAddress: mainaddress,
+                    SecondaryAddress: secondaryaddress,
+                    NIF: nif,
+                    photoURL : photoURL
+                })
+            });
+            if (response.ok) {
+                // handle successful registration
+                console.log("Successfull registration")
+                window.location.href = '/index.html';
+            } else {
+                const errorMessage = await response.text();
+                alert(errorMessage);
+            }
+        });
+    </script>
+</body>
+</html>
