@@ -57,6 +57,10 @@ public class LoginResource {
 							.build();
 					txn.put(authtoken);
 					txn.commit();
+					if (txn.isActive()) {
+					    txn.rollback();
+					  }
+					
 					return Response.ok().entity(g.toJson(at)).build();
 				}
 			}	txn.rollback();

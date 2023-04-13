@@ -41,6 +41,9 @@ public class AuthTokenverification {
 						} else {
 							txn.delete(ctrsKey);
 							txn.commit();
+							if (txn.isActive()) {
+							    txn.rollback();
+							  }
 							return false;
 						}
 			txn.rollback();

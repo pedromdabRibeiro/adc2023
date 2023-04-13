@@ -52,6 +52,10 @@ public class DeletionResource {
 				friendResource.DeleteFriendprivate(username);
 				txn.delete(userKey);
 				txn.commit();
+				if (txn.isActive()) {
+				    txn.rollback();
+				  }
+				
 				return Response.ok().build();
 			}
 			txn.rollback();

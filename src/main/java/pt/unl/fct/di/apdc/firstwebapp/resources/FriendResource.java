@@ -60,6 +60,10 @@ public class FriendResource {
 								.set("username", username).build();
 						txn.put(person);
 						txn.commit();
+						if (txn.isActive()) {
+						    txn.rollback();
+						  }
+						
 						return Response.ok("Sent friend request").build();
 					} else {
 						return Response.status(Status.BAD_REQUEST)
@@ -98,6 +102,10 @@ public class FriendResource {
 						txn.delete(reqlistKey);
 						txn.add(myentry, friendentry);
 						txn.commit();
+						if (txn.isActive()) {
+						    txn.rollback();
+						  }
+						
 						return Response.ok("Accepted friend request").build();
 					} else {
 						return Response.status(Status.BAD_REQUEST).entity("No such friend request").build();
@@ -126,6 +134,10 @@ public class FriendResource {
 				if (txn.get(reqlistKey) != null) {
 					txn.delete(reqlistKey);
 					txn.commit();
+					if (txn.isActive()) {
+					    txn.rollback();
+					  }
+					
 					return Response.ok("Declined friend request").build();
 				} else {
 					return Response.status(Status.BAD_REQUEST).entity("No such friend request").build();
@@ -158,6 +170,9 @@ public class FriendResource {
 					txn.delete(ownlistKey);
 					txn.delete(FrlistKey);
 					txn.commit();
+					if (txn.isActive()) {
+					    txn.rollback();
+					  }
 					return Response.ok("Deleted friend ").build();
 				} else {
 					return Response.status(Status.BAD_REQUEST).entity("No such friend ").build();
@@ -198,6 +213,9 @@ public class FriendResource {
 			}
 		}
 		txn.commit();
-
+		if (txn.isActive()) {
+		    txn.rollback();
+		  }
+		
 	}
 }

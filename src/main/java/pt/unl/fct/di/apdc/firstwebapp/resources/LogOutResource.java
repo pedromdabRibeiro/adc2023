@@ -41,6 +41,9 @@ public class LogOutResource {
 						.setKind("AuthToken").newKey(token.tokenID);
 				txn.delete(ctrsKey);
 				txn.commit();
+				if (txn.isActive()) {
+				    txn.rollback();
+				  }
 				return Response.ok().build();
 			}
 			txn.rollback();

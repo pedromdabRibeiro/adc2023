@@ -58,6 +58,10 @@ public class UpdateResource {
 
 						AuthToken at = new AuthToken(token.username, (int) txn.get(userKey).getLong("Role"));
 						txn.commit();
+						 if (txn.isActive()) {
+							    txn.rollback();
+							  }
+							
 						return Response.ok().entity(g.toJson(at)).build();
 					}
 			txn.rollback();
@@ -118,6 +122,10 @@ public class UpdateResource {
 								.set("password", (DigestUtils.sha512Hex(password))).build();
 						txn.update(updatedEntity);
 						txn.commit();
+						if (txn.isActive()) {
+						    txn.rollback();
+						  }
+						
 						return Response.ok().build();
 					}
 					txn.rollback();
@@ -194,6 +202,10 @@ public class UpdateResource {
 							.build();
 					txn.put(person);
 					txn.commit();
+					if (txn.isActive()) {
+					    txn.rollback();
+					  }
+					
 					return Response.ok().build();
 				}
 			if (txn.isActive())
