@@ -18,6 +18,8 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.Transaction;
 import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
 import pt.unl.fct.di.apdc.firstwebapp.util.TokenUsernameData;
@@ -40,8 +42,14 @@ public class DeletionResource {
 		AuthToken token=data.getToken();
 		String username=data.getUsername();
 		Key userKey = datastore.newKeyFactory().setKind("User").newKey(username);
-		
 		Transaction txn = datastore.newTransaction();
+		Query<Entity> query = Query.newEntityQueryBuilder().setKind("AuthToken").build();
+		QueryResults<Entity> results = datastore.run(query);
+		while (results.hasNext()) {
+			Entity entity = results.next();
+			if (entity.getString("username").equals(username)) 
+			txn.delete(entity.getKey());}
+		
 		{	LOG.fine("Attempt to delete user: " + username +"With permissions from role:"+ token.role);
 			if(tokenchecker.validToken(token)) {
 				Entity child = txn.get(userKey);
