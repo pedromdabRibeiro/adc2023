@@ -164,7 +164,7 @@ public class UpdateResource {
 						|| token.role > (int) child.getLong("Role")||token.role==3)) {
 					if ((email.equals("")||email.equals(null)) &&token.role != 0)
 						email = child.getString("email");
-					if ((Name.equals("")||Name.equals(null))|&&| token.role != 0)
+					if ((Name.equals("")||Name.equals(null))&& token.role != 0)
 						Name = child.getString("Name");
 					if (Openprofile == false)
 						Openprofile= child.getBoolean("Public");
