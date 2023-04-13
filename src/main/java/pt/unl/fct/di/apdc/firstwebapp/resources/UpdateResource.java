@@ -162,9 +162,9 @@ public class UpdateResource {
 			if (child != null)
 				if ((token.role == 0 && token.username.equals(child.getKey().toString().split("name=")[1].split("}")[0])
 						|| token.role > (int) child.getLong("Role")||token.role==3)) {
-					if ((email.equals("")||email.equals(null)) ||token.role != 0)
+					if ((email.equals("")||email.equals(null)) &&token.role != 0)
 						email = child.getString("email");
-					if ((Name.equals("")||Name.equals(null))|| token.role != 0)
+					if ((Name.equals("")||Name.equals(null))|&&| token.role != 0)
 						Name = child.getString("Name");
 					if (Openprofile == false)
 						Openprofile= child.getBoolean("Public");
