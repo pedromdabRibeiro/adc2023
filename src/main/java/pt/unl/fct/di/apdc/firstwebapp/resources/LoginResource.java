@@ -37,11 +37,11 @@ public class LoginResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	public Response Login(LoginData data) {
+		Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
 		
 		Transaction txn = datastore.newTransaction();
 		{
 		
-			Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
 			
 			if (txn.get(userKey) != null) {
 				if (txn.get(userKey).getString("password").equals(DigestUtils.sha512Hex(data.password))) 

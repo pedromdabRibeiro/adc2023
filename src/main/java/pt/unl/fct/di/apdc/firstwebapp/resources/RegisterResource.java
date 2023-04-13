@@ -44,10 +44,6 @@ public class RegisterResource {
 					.set("photoURL", data.photoURL).set("nif",data.NIF).set("State",false).set("Role",0).build();
 			txn.add(person);
 			txn.commit();
-			if (txn.isActive()) {
-			    txn.rollback();
-			  }
-			
 			return Response.ok().build();
 		}
 		if(txn.isActive())

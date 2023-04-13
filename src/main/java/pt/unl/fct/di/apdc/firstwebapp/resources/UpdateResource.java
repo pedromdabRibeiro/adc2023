@@ -122,10 +122,6 @@ public class UpdateResource {
 								.set("password", (DigestUtils.sha512Hex(password))).build();
 						txn.update(updatedEntity);
 						txn.commit();
-						if (txn.isActive()) {
-						    txn.rollback();
-						  }
-						
 						return Response.ok().build();
 					}
 					txn.rollback();
@@ -138,7 +134,6 @@ public class UpdateResource {
 		}
 		return Response.status(Status.FORBIDDEN).entity("INVALID TOKEN PLEASE RELOG").build();
 	}
-
 	@POST
 	@Path("/UpdateUser")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -161,38 +156,38 @@ public class UpdateResource {
 		String  pfp=data.getpfpURL();
 		
 		if (tokenchecker.validToken(token)) {
-			Transaction txn = datastore.newTransaction();
 			Key userKey = datastore.newKeyFactory().setKind("User").newKey(username);
+			Transaction txn = datastore.newTransaction();
 			Entity child = txn.get(userKey);
 			if (child != null)
 				if ((token.role == 0 && token.username.equals(child.getKey().toString().split("name=")[1].split("}")[0])
 						|| token.role > (int) child.getLong("Role")||token.role==3)) {
-					if (email.equals(null) && token.role != 0)
+					if ((email.equals("")||email.equals(null)) ||token.role != 0)
 						email = child.getString("email");
-					if (Name.equals(null) && token.role != 0)
+					if ((Name.equals("")||Name.equals(null))|| token.role != 0)
 						Name = child.getString("Name");
-					if (Openprofile == null)
-						email = child.getString("Openprofile");
+					if (Openprofile == false)
+						Openprofile= child.getBoolean("Public");
 					if (TelNumb == null)
 						TelNumb = (int) child.getLong("Tp#");
 					if (Phonenumber == null)
 						Phonenumber = (int) child.getLong("P#");
-					if (Job.equals(null))
+					if (Job.equals("")||Job.equals(null))
 						Job = txn.get(userKey).getString("Occupation");
-					if (SecondaryAddress.equals(null))
+					if (SecondaryAddress.equals("")||SecondaryAddress.equals(null))
 						SecondaryAddress = child.getString("Sec Address");
-					if (placeOfWork.equals(null))
+					if (placeOfWork.equals("")||placeOfWork.equals(null))
 						placeOfWork = child.getString("Place of Work");
-					if (MainAddress.equals(null))
+					if (MainAddress.equals("")||MainAddress.equals(null))
 						MainAddress = child.getString("Main Addr");
 					if (NIF == null)
 						NIF = (int) child.getLong("nif");
 					String password = child.getString("password");
 					if(State==false)
 						State=child.getBoolean("State");
-					if(Role==null)
+					if(Role==null||Role>token.getRole())
 						Role=(int) child.getLong("Role");
-					if(pfp.equals(null))
+					if(pfp.equals(null)||pfp=="")
 					pfp=child.getString("photoURL");
 					
 					Entity person = Entity.newBuilder(userKey).set("password", password).set("email", email)

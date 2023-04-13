@@ -35,8 +35,16 @@ public class AuthTokenverification {
 				if (txn.get(ctrsKey) != null)
 					if (childtoken.getLong("DelTime") == token.expirationData)
 						if (!(System.currentTimeMillis() >= token.expirationData)) {
-							if (childtoken.getString("username").equals(token.username))
+							if (childtoken.getString("username").equals(token.username)) {
+								if (txn.isActive()) {
+								    txn.rollback();
+								  }
 								return true;
+							}
+							if (txn.isActive()) {
+							    txn.rollback();
+							  }
+							
 							return false;
 						} else {
 							txn.delete(ctrsKey);

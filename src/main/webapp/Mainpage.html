@@ -196,7 +196,7 @@
 					// clear authentication token from cookie
 					//document.cookie = 'authToken=;max-age=0';
 					// redirect to login page
-					 window.location.href = '/index.html';
+					 window.location.href = '/loggedout.html';
 				} else {
 					const errorMessage = await response.text();
 					alert(errorMessage);

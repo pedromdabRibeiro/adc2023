@@ -33,12 +33,13 @@ public class LogOutResource {
 	@Path("/logout")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response Logout(AuthToken token) {
+		Key ctrsKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
+				.setKind("AuthToken").newKey(token.tokenID);
 		Transaction txn = datastore.newTransaction();
 		{
 			LOG.fine("Attempt to logout user: " + token.username );
 			if (tokenchecker.validToken(token)) {
-				Key ctrsKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username))
-						.setKind("AuthToken").newKey(token.tokenID);
+				
 				txn.delete(ctrsKey);
 				txn.commit();
 				if (txn.isActive()) {

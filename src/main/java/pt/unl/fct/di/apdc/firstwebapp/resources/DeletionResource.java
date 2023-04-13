@@ -39,11 +39,12 @@ public class DeletionResource {
 	public Response DeleteUserRole(TokenUsernameData data) {
 		AuthToken token=data.getToken();
 		String username=data.getUsername();
+		Key userKey = datastore.newKeyFactory().setKind("User").newKey(username);
+		
 		Transaction txn = datastore.newTransaction();
 		{	LOG.fine("Attempt to delete user: " + username +"With permissions from role:"+ token.role);
 			if(tokenchecker.validToken(token)) {
-			Key userKey = datastore.newKeyFactory().setKind("User").newKey(username);
-			Entity child = txn.get(userKey);
+				Entity child = txn.get(userKey);
 			if (txn.get(userKey) != null && ((token.username.equals(username)) || token.role > (int)child.getLong("Role"))) {
 				if(!child.getString("photoURL").equals("")) {
 					deleteObject(child.getString("photoURL").split("https://storage.googleapis.com/apdc-2023-avaliacao-individual.appspot.com/")[1]);
@@ -61,6 +62,7 @@ public class DeletionResource {
 			txn.rollback();
 			return Response.status(Status.FORBIDDEN).entity("WRONG PERMISSION").build();
 		}
+			txn.rollback();
 			return Response.status(Status.EXPECTATION_FAILED).entity("INVALID TOKEN PLEASE RELOG").build();
 			}
 		

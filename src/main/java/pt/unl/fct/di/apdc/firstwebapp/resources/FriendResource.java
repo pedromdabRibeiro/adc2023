@@ -108,11 +108,13 @@ public class FriendResource {
 						
 						return Response.ok("Accepted friend request").build();
 					} else {
+						txn.rollback();
 						return Response.status(Status.BAD_REQUEST).entity("No such friend request").build();
 					}
 				txn.rollback();
 				return Response.status(Status.FORBIDDEN).entity("Incorrect username").build();
 			}
+			txn.rollback();
 			return Response.status(Status.EXPECTATION_FAILED).entity("INVALID TOKEN PLEASE RELOG").build();
 		}
 	}
@@ -139,12 +141,13 @@ public class FriendResource {
 					  }
 					
 					return Response.ok("Declined friend request").build();
-				} else {
+				} else {txn.rollback();
 					return Response.status(Status.BAD_REQUEST).entity("No such friend request").build();
 				}
 			txn.rollback();
 			return Response.status(Status.FORBIDDEN).entity("Incorrect username").build();
 		}
+			txn.rollback();
 			return Response.status(Status.EXPECTATION_FAILED).entity("INVALID TOKEN PLEASE RELOG").build();
 		}
 	}
@@ -174,12 +177,12 @@ public class FriendResource {
 					    txn.rollback();
 					  }
 					return Response.ok("Deleted friend ").build();
-				} else {
+				} else {txn.rollback();
 					return Response.status(Status.BAD_REQUEST).entity("No such friend ").build();
 				}
 			txn.rollback();
 			return Response.status(Status.FORBIDDEN).entity("Incorrect username").build();
-		}
+		}txn.rollback();
 		return Response.status(Status.EXPECTATION_FAILED).entity("INVALID TOKEN PLEASE RELOG").build();
 	}
 	}

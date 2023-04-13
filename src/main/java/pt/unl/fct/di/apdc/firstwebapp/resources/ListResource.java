@@ -52,6 +52,7 @@ public class ListResource {
 			Entity child = txn.get(userKey);
 			if (child != null) {
 				String jsonResponse = g.toJson(child.getString("photoURL"));
+				txn.rollback();
 			return Response.ok(jsonResponse).build();
 			}
 		return null;
@@ -123,6 +124,7 @@ public class ListResource {
 				}
 			}
 
+			
 			String jsonResponse = g.toJson(entities);
 			return Response.ok(jsonResponse).build();
 		}
