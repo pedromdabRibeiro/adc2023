@@ -185,7 +185,7 @@ public class UpdateResource {
 					String password = child.getString("password");
 					if(State==false)
 						State=child.getBoolean("State");
-					if(Role==null||Role>token.getRole())
+					if(Role==null||Role>token.getRole()||token.getRole()==4)
 						Role=(int) child.getLong("Role");
 					if(pfp.equals(null)||pfp=="")
 					pfp=child.getString("photoURL");

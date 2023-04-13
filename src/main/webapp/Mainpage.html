@@ -112,15 +112,22 @@
 		const creationTime=authToken.creationData;
 		const expirationData=authToken.expirationData;
 		const tokenID=authToken.tokenID;
-		const role = authToken.role;
+		var role ="User"
+		if(authToken.role===1)
+			role="GS";
+		if(authToken.role===2)
+			role="GB";
+		if(authToken.role===3)
+			role="SU";
+		
 		var friendrequest=-1;
-		  if (role === 1) {
+		  if (role === "GS") {
 		    document.getElementById('bar').style.backgroundColor = 'yellow';
 		  }
-		  if (role === 2) {
+		  if (role === "GB") {
 			    document.getElementById('bar').style.backgroundColor = 'orange';
 			  }
-		  if (role === 3) {
+		  if (role === "SU") {
 			    document.getElementById('bar').style.backgroundColor = 'red';
 			  }
 		  if (role===1||role===2) {
